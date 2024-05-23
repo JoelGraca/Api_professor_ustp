@@ -2,14 +2,28 @@
 // Inclui o arquivo de conexão
 require_once 'conexao.php';
 
-// Inicializa a variável para armazenar o nome do professor a ser buscado
-$nomeProfessor = isset($_GET['nomeProfessor']) ? $_GET['nomeProfessor'] : '';
+// Define a chave de API esperada (em um ambiente real, armazene isso de forma mais segura)
+$apiKeyExpected = 'rgbACis47USTP@';
 
-// Query SQL para selecionar professores filtrando por nome
+// Inicializa a variável para armazenar o ID do professor a ser buscado
+$idProfessor = isset($_GET['idProfessor']) ? $_GET['idProfessor'] : '';
+
+// Obtém a chave de API da requisição
+$apiKey = isset($_GET['apiKey']) ? $_GET['apiKey'] : '';
+
+// Verifica se a chave de API está presente e é válida
+if ($apiKey !== $apiKeyExpected) {
+    // Retorna uma mensagem de erro se a chave de API for inválida
+    header('Content-Type: application/json');
+    echo json_encode(array('error' => 'Chave de API inválida.'));
+    exit;
+}
+
+// Query SQL para selecionar professores filtrando por ID
 $sql = "SELECT * FROM tbprofessores";
-if (!empty($nomeProfessor)) {
-    // Adiciona uma cláusula WHERE para filtrar por nome do professor
-    $sql .= " WHERE nomeProfessor LIKE '%$nomeProfessor%'";
+if (!empty($idProfessor)) {
+    // Adiciona uma cláusula WHERE para filtrar por ID do professor
+    $sql .= " WHERE idProfessor='{$idProfessor}'";
 }
 
 $result = $conn->query($sql);

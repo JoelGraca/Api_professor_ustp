@@ -1,128 +1,116 @@
+<?php
+// URL da API
+$url = "https://api-professor-ustp.000webhostapp.com/api.php?&apiKey=rgbACis47USTP@";
+
+// Obtendo os dados da API
+$response = file_get_contents($url);
+
+// Verificando se houve erro na requisição
+if ($response === FALSE) {
+    echo "Erro ao acessar a API.";
+    exit; // Saímos do script se ocorrer um erro
+}
+
+// Decodificando a resposta JSON
+$professors = json_decode($response);
+
+// Verificando se a decodificação foi bem-sucedida
+if ($professors === NULL) {
+    echo "Erro ao decodificar os dados da API.";
+    exit; // Saímos do script se ocorrer um erro
+}
+
+// Verificando se os dados são válidos
+if (!is_array($professors)) {
+    echo "Os dados da API não estão no formato esperado.";
+    exit; // Saímos do script se ocorrer um erro
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Professores em Formulário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body{
-            background-image: url('image/ustp.png');
+        body {
+            background-image: url("image/ustp.png");
             background-size: cover; /* Ajusta o tamanho da imagem para cobrir todo o fundo */
             background-repeat: no-repeat; /* Evita a repetição da imagem */
-            font-size: 15px;
-            justify-content: center; /* Centraliza horizontalmente o conteúdo */
-            align-items: center; /* Centraliza verticalmente o conteúdo */
-            height: 100vh; /* Define a altura da página como 100% da altura da viewport */
-            margin: 0; /* Remove as margens padrão do body */
-            text-align: center;
+            background-attachment: fixed; /* Faz a imagem de fundo ficar fixa */
         }
-        .format{
-            display:flex;
-            width:580px;
-            margin-top: 20px;
-            margin-left: 500px;
-            color:black;
-            font-size: 15px;
+        .card {
+            background-color: rgba(0, 0, 0, 0.8); /* Cor preta com 10% de opacidade */
+            color: white;
+            font-size: 20px;
+            
+        }
+        .text-center{
+            margin-top: 30px;
+            font-size: 30px;
+            
+        }
+        b{
             font-weight: 800;
         }
-        .texto{
-            margin-top: 10px;
-            text-align: center;
-        }
-        h4{
-            margin-top: 5px;
-        }
-        h5{
-            color: #1874cd;
-        }
-        select{
-            height: 40px;
-            width:300px;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .texto{
-            color: #1c1c1c;
-            font-weight: 800;
-        }
-        
-       
-        
-       
-        
+
+
     </style>
-   
 </head>
 <body>
 
-<h1 class="texto">Lista de Professores</h1>
+<h1 class="text-center"><b>Dados Profissionais dos Professores <img src="image/logo.png" alt="" width="60px;" height="50px;"></b></h1>
 
-<?php
-// Inclui o arquivo de conexão
-require_once 'conexao.php';
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+        <form action="" method="post" class="mb-3">
+        <div class="input-group mb-3">
+            <input type="number" name="idProfessor" class="form-control" placeholder="Informe o ID do professor" value="<?php echo isset($_POST['idProfessor']) ? $_POST['idProfessor'] : ''; ?>" required>
+            <button type="submit" class="btn btn-primary">Mostrar Dados</button>
+        </div>
 
-// Define a variável para armazenar o ID do professor selecionado
-$selected_professor_id = '';
+</form>
 
-// Verifica se o formulário foi submetido
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Obtém o ID do professor selecionado
-    $selected_professor_id = $_POST["professor"];
-}
 
-// Query SQL para selecionar todos os professores
-$sql = "SELECT * FROM tbprofessores";
-$result = $conn->query($sql);
+            <?php
+            // Verifica se o formulário foi enviado
+            if (isset($_POST['idProfessor'])) {
+                $idProfessor = $_POST['idProfessor'];
+                $selectedProfessor = null;
 
-// Verifica se existem registros
-if ($result->num_rows > 0) {
-    // Exibe um seletor de nomes dos professores
-    echo '<form action="" method="post">';
-    echo '<label for="professor"><h4>Selecione um Professor: </h4> </label>';
-  
-    echo '<select name="professor" id="professor">';
-    while ($row = $result->fetch_assoc()) {
-        $selected = ($selected_professor_id == $row["idProfessor"]) ? 'selected' : '';
-        echo '<option value="' . $row["idProfessor"] . '" ' . $selected . '>' . $row["nomeProfessor"] . '</option>';
-    }
-    echo '</select>';
-    echo '<input class="btn btn-primary" style="height:46px;border: radiux 5%;"  type="submit" value="Mostrar Dados">';
-   
-    echo '</form>';
-    echo '<br>';
+                // Encontrar o professor selecionado
+                foreach ($professors as $professor) {
+                    if ($professor->idProfessor == $idProfessor) {
+                        $selectedProfessor = $professor;
+                        break;
+                    }
+                }
 
-    // Se o formulário foi submetido e um professor foi selecionado
-    if ($selected_professor_id != '') {
-        // Query SQL para selecionar os dados do professor selecionado
-        $selected_professor_sql = "SELECT * FROM tbprofessores WHERE idProfessor = $selected_professor_id";
-        $selected_result = $conn->query($selected_professor_sql);
-
-        // Exibe os dados do professor selecionado
-        if ($selected_result->num_rows > 0) {
-            $selected_row = $selected_result->fetch_assoc();
-            echo '<div class="conteudo">';
-            echo '<div class="format"><label for="nome"><b><h5>Nome:</h5></b> </label> <input class="form-control type="text" id="nome" value="' . $selected_row["nomeProfessor"] . '" readonly><br></div></div>';
-            echo '<div class="format"><label for="morada"><b><h5>Morada:</h5></b> </label> <input class="form-control type="text" id="morada" value="' . $selected_row["moradaProfessor"] . '" readonly><br></div>';
-            echo '<div class="format"><label for="contato"><b><h5>Contato:</h5></b> </label> <input class="form-control type="text" id="contato" value="' . $selected_row["contatoProfessor"] . '" readonly><br></div>';
-            echo '<div class="format"><label for="genero"><b><h5>Gênero: </h5></b> </label> <input class="form-control type="text" id="genero" value="' . $selected_row["genero"] . '" readonly><br></div>';
-            echo '<div class="format"><label for="nivel_academico"><b><h5>Nível Acadêmico:</h5></b> </label> <input class="form-control type="text" id="nivel_academico" value="' . $selected_row["nivel_academico"] . '" readonly><br></div>';
-            echo '<div class="format"><label for="curso"><b><h5>Curso:</h5></b> </label> <input class="form-control type="text" id="curso" value="' . $selected_row["curso"] . '" readonly><br></div>';
-            echo '<div class="format"><label for="categoria"><b><h5>Categoria:</h5></b> </label> <input class="form-control type="text" id="categoria" value="' . $selected_row["categoria"] . '" readonly><br></div>';
-            echo '<div class="format"><label for="anos_profissao"><b><h5>Anos de Profissão:</h5></b> </label> <input class="form-control" style="width: 100px;" type="text" id="anos_profissao" value="' . $selected_row["anos_profissao"] . '" readonly><br></div>';
-            echo '</div>';
-        } else {
-            echo "Nenhum professor encontrado para o ID selecionado.";
-        }
-    }
-} else {
-    echo "Nenhum professor encontrado.";
-}
-
-// Fecha a conexão
-$conn->close();
-?>
-
+                // Exibir os dados do professor selecionado
+                if ($selectedProfessor !== null) {
+                    echo '<div class="card">';
+                    echo '<div class="card-body">';
+                    echo '<p class="card-text"><b>Nome:</b> ' . $selectedProfessor->nomeProfessor . '</p>';
+                    echo '<p class="card-text"><b>Morada:</b> ' . $selectedProfessor->moradaProfessor . '</p>';
+                    echo '<p class="card-text"><b>Contato:</b> ' . $selectedProfessor->contatoProfessor . '</p>';
+                    echo '<p class="card-text"><b>Gênero:</b> ' . $selectedProfessor->genero . '</p>';
+                    echo '<p class="card-text"><b>Nível Acadêmico:</b> ' . $selectedProfessor->nivel_academico . '</p>';
+                    echo '<p class="card-text"><b>Curso:</b> ' . $selectedProfessor->curso . '</p>';
+                    echo '<p class="card-text"><b>Categoria:</b> ' . $selectedProfessor->categoria . '</p>';
+                    echo '<p class="card-text"><b>Anos de Profissão:</b> ' . $selectedProfessor->anos_profissao . '</p>';
+                    echo '</div>';
+                    echo '</div>';
+                } else {
+                    echo "<b><h5><p class='text-danger'>Nenhum professor encontrado para o ID selecionado.</p></h5></b>";
+                }
+            }
+            ?>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
